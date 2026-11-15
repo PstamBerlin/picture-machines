@@ -1,7 +1,7 @@
 // Picture Machines: the machines that make a picture. Each one takes a picture { w, h, d } and its
 // settings and gives back { out, stats }. They run in the worker; env.canvas(w, h) makes a drawing
 // surface and env.progress(0..1) tells the page how far along we are.
-import { clamp, lerp, smooth, rng, pic, luma, blur, blurPlane, gradient, inkLines, palette, nearestMaker, resize, saturate, hex, rgb2lab, distance } from './lib.js?v=55c5dab7';
+import { clamp, lerp, smooth, rng, pic, luma, blur, blurPlane, gradient, inkLines, palette, nearestMaker, resize, saturate, hex, rgb2lab, distance } from './lib.js?v=b317c2f9';
 
 const sizeOf = (p) => Math.max(p.w, p.h);
 const hash = (x, y, s = 0) => { let n = (x * 374761393 + y * 668265263 + s * 2147483647) | 0; n = Math.imul(n ^ (n >>> 13), 1274126177); return ((n ^ (n >>> 16)) >>> 0) / 4294967296; };

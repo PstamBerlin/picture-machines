@@ -1,19 +1,19 @@
 // Picture Machines: the page. It holds the photo, builds the machine cards and the controls from
 // machines.js, and asks the worker to run a machine whenever something changes. A small preview is
 // made while you play with the settings; the full-size picture is only made when you save.
-import { MACHINES, BY_ID, defaults } from './machines.js?v=55c5dab7';
+import { MACHINES, BY_ID, defaults } from './machines.js?v=b317c2f9';
 
 const $ = (s) => document.querySelector(s);
 const el = { drop: $('#drop'), result: $('#result'), view: $('#view'), before: $('#before'), after: $('#after'), wipe: $('#wipe'), busy: $('#busy'), busyText: $('#busyText'), busyBar: $('#busyBar'), stats: $('#stats'),
-  pic: $('#picCards'), print: $('#printCards'), name: $('#machineName'), blurb: $('#machineBlurb'), controls: $('#controls'), save: $('#saveBtn'), save2: $('#save2Btn'), share: $('#shareBtn'), note: $('#note'),
+  pic: $('#picCards'), print: $('#printCards'), panel: $('#panel'), cardpill: $('#cardpill'), ico: $('#machineIco'), name: $('#machineName'), blurb: $('#machineBlurb'), controls: $('#controls'), save: $('#saveBtn'), save2: $('#save2Btn'), share: $('#shareBtn'), note: $('#note'),
   reset: $('#resetBtn'), newBtn: $('#newBtn'), pick: $('#pickBtn'), camBtn: $('#camBtn'), sample: $('#sampleBtn'), file: $('#file'), cam: $('#cam'), toast: $('#toast') };
 const coarse = matchMedia('(pointer: coarse)').matches, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // how big the picture is at each step: small while you play, big when you save (phones get a little less)
 const SIZE = { preview: coarse ? 440 : 600, full: coarse ? 1280 : 1600, print: 900, thumb: 132, keep: 2400 };
 const LS = 'picture-machines-v1';
 const saved = (() => { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch (e) { return {}; } })();
-const state = { id: BY_ID[saved.id] ? saved.id : 'paint', opts: saved.opts && typeof saved.opts === 'object' ? saved.opts : {}, photo: null, last: null };
-const remember = () => { try { localStorage.setItem(LS, JSON.stringify({ id: state.id, opts: state.opts })); } catch (e) { /* private window: nothing is remembered */ } };
+const state = { id: BY_ID[saved.id] ? saved.id : 'paint', opts: saved.opts && typeof saved.opts === 'object' ? saved.opts : {}, glass: !!saved.glass, photo: null, last: null };
+const remember = () => { try { localStorage.setItem(LS, JSON.stringify({ id: state.id, opts: state.opts, glass: state.glass })); } catch (e) { /* private window: nothing is remembered */ } };
 const optsOf = (id) => { const o = defaults(id), mine = state.opts[id] || {}; for (const c of BY_ID[id].controls) if (c.id in mine) o[c.id] = mine[c.id]; return o; };
 
 /* ---------- the worker ---------- */
@@ -23,7 +23,7 @@ function runner() {
   let wk = null, job = 0, drop = null;
   return (id, src, opts, onProgress) => new Promise((done, fail) => {
     if (drop) { wk.terminate(); wk = null; drop(new Error('stale')); drop = null; }
-    if (!wk) wk = new Worker('worker.js?v=55c5dab7', { type: 'module' });
+    if (!wk) wk = new Worker('worker.js?v=b317c2f9', { type: 'module' });
     const mine = ++job; drop = fail;
     wk.onmessage = (e) => { const m = e.data; if (m.job !== mine) return; if (m.progress !== undefined) { if (onProgress) onProgress(m.progress); return; } drop = null; if (m.ok) done(m); else fail(new Error(m.error)); };
     wk.onerror = (e) => { drop = null; wk = null; fail(new Error(e.message || 'the worker stopped')); };
@@ -114,9 +114,12 @@ async function thumbs() {                   // one after another, on a worker of
   }
 }
 function choose(id, quiet) {
+  const was = cards.get(state.id), now = cards.get(id), from = quiet || was === now ? null : boxIn(was, el.panel);
   state.id = id; remember();
   for (const [k, b] of cards) { b.classList.toggle('on', k === id); b.setAttribute('aria-pressed', String(k === id)); }
+  if (from) glideCard(from, now);
   const m = BY_ID[id]; el.name.textContent = m.name; el.blurb.textContent = m.blurb;
+  el.ico.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + ICON[m.icon] + '"/></svg>'; el.ico.classList.remove('popped'); void el.ico.offsetWidth; el.ico.classList.add('popped');
   el.save.textContent = m.kind === 'print' ? 'Save the 3D file' : 'Save the picture'; el.save2.hidden = m.kind !== 'print';
   el.note.textContent = m.kind === 'print' ? 'The 3D file is an STL. Open it in your slicer and print it.' : 'Saving makes a full-size version first, so it can take a moment.';
   buildControls();
@@ -137,7 +140,7 @@ function buildControls() {
       node = document.createElement('label'); node.className = 'ctl'; node.innerHTML = '<span class="lbl"><span></span><output></output></span><input type="range">';
       node.querySelector('.lbl span').textContent = c.label; const i = node.lastChild, out = node.querySelector('output');
       i.min = c.min; i.max = c.max; i.step = c.step; i.value = o[c.id];
-      const paint = () => { out.textContent = (+i.value).toFixed(c.step < 1 ? (c.step < 0.1 ? 2 : 1) : 0) + (c.unit ? ' ' + c.unit : ''); i.style.setProperty('--fill', ((i.value - c.min) / (c.max - c.min) * 100).toFixed(1) + '%'); };
+      const paint = () => { out.textContent = (+i.value).toFixed(c.step < 1 ? (c.step < 0.1 ? 2 : 1) : 0) + (c.unit ? ' ' + c.unit : ''); i.style.setProperty('--fill-to', ((i.value - c.min) / (c.max - c.min) * 100).toFixed(1) + '%'); };
       i.addEventListener('input', () => { paint(); set(c, +i.value); }); paint();
     } else {
       node = document.createElement('div'); node.className = 'ctl'; node.innerHTML = '<span class="lbl"><span></span></span><div class="seg" role="group"><i class="pill"></i></div>';
@@ -152,23 +155,45 @@ function buildControls() {
   }
   showHide(); requestAnimationFrame(() => el.controls.querySelectorAll('.seg').forEach((s) => placePill(s, false)));
 }
-// The pill behind the chosen option is pulled across to the new one: its front edge runs ahead, so for a
-// moment it is stretched over both and thinner, then its back edge lets go and it snaps together.
+// Pull and stretch. A pill (behind a chosen option, or round the chosen machine) is pulled across to the
+// new place: its front edge runs ahead, so for a moment it is stretched over both and thinner, like
+// something soft, then its back edge lets go and catches up on a spring. Each edge has its own timing,
+// which one easing curve cannot do, so the frames are worked out here.
 function spring(u) { if (u <= 0) return 0; if (u >= 1) return 1; const z = 0.5, wd = Math.sqrt(1 - z * z), w = -Math.log(0.004 * wd) / z; return 1 - Math.exp(-z * w * u) * (Math.cos(wd * w * u) + (z / wd) * Math.sin(wd * w * u)); }
+function pullFrames(from, to) {
+  const frames = [], N = 30, fx = to.x + to.w / 2 >= from.x + from.w / 2, fy = to.y + to.h / 2 >= from.y + from.h / 2;
+  const dx = Math.abs(to.x - from.x), dy = Math.abs(to.y - from.y), far = Math.hypot(dx, dy) || 1;
+  for (let i = 0; i <= N; i++) {
+    const t = i / N, lead = 1 - Math.pow(1 - Math.min(1, t / 0.44), 3), trail = spring((t - 0.16) / 0.84);
+    let x0 = from.x + (to.x - from.x) * (fx ? trail : lead), x1 = from.x + from.w + (to.x + to.w - from.x - from.w) * (fx ? lead : trail);
+    let y0 = from.y + (to.y - from.y) * (fy ? trail : lead), y1 = from.y + from.h + (to.y + to.h - from.y - from.h) * (fy ? lead : trail);
+    // thinner while it is long: across its length when it travels along a row, or along a column
+    const longX = Math.max(0, (x1 - x0) - (from.w + (to.w - from.w) * t)), longY = Math.max(0, (y1 - y0) - (from.h + (to.h - from.h) * t));
+    if (dy < 2 && dx > 2) { const k = 0.34 * Math.min(1, longX / far) * (y1 - y0) / 2; y0 += k; y1 -= k; }
+    if (dx < 2 && dy > 2) { const k = 0.34 * Math.min(1, longY / far) * (x1 - x0) / 2; x0 += k; x1 -= k; }
+    frames.push({ left: x0.toFixed(2) + 'px', top: y0.toFixed(2) + 'px', width: Math.max(4, x1 - x0).toFixed(2) + 'px', height: Math.max(4, y1 - y0).toFixed(2) + 'px' });
+  }
+  frames[N] = { left: to.x + 'px', top: to.y + 'px', width: to.w + 'px', height: to.h + 'px' };
+  return { frames, opts: { duration: Math.min(760, 460 + far * 0.45), easing: 'linear' } };
+}
+const boxIn = (node, box) => { const a = node.getBoundingClientRect(), b = box.getBoundingClientRect(); return { x: a.left - b.left - box.clientLeft, y: a.top - b.top - box.clientTop, w: a.width, h: a.height }; };
 function placePill(seg, animate) {
   const on = seg.querySelector('button.on'), pill = seg.querySelector('.pill'); if (!on) return;
   const to = { x: on.offsetLeft, y: on.offsetTop, w: on.offsetWidth, h: on.offsetHeight }, from = pill.at; pill.at = to;
-  pill.style.width = to.w + 'px'; pill.style.height = to.h + 'px'; pill.style.transformOrigin = '0 50%'; pill.style.transform = 'translate(' + to.x + 'px,' + to.y + 'px)';
+  Object.assign(pill.style, { left: to.x + 'px', top: to.y + 'px', width: to.w + 'px', height: to.h + 'px' });
   if (!animate || !from || still || !pill.animate) return;
-  const frames = [], N = 26, fwd = to.x + to.w / 2 > from.x + from.w / 2, far = Math.abs(to.x - from.x) || 1;
-  for (let i = 0; i <= N; i++) {
-    const t = i / N, lead = 1 - Math.pow(1 - Math.min(1, t / 0.44), 3), trail = spring((t - 0.16) / 0.84);
-    const lo = from.x + (to.x - from.x) * (fwd ? trail : lead), hi = from.x + from.w + (to.x + to.w - from.x - from.w) * (fwd ? lead : trail), y = from.y + (to.y - from.y) * lead;
-    const thin = from.y === to.y ? 1 - 0.34 * Math.min(1, Math.max(0, (hi - lo) - (from.w + (to.w - from.w) * t)) / far) : 1;
-    frames.push({ transform: 'translate(' + lo.toFixed(2) + 'px,' + y.toFixed(2) + 'px) scale(' + (Math.max(4, hi - lo) / to.w).toFixed(4) + ',' + thin.toFixed(3) + ')' });
-  }
-  frames[N] = { transform: 'translate(' + to.x + 'px,' + to.y + 'px)' };
-  pill.animate(frames, { duration: Math.min(700, 440 + far * 0.5), easing: 'linear' });
+  if (pill.run) pill.run.cancel();                    // a move that is still on its way is dropped for the new one
+  const f = pullFrames(pill.now || from, to); pill.run = pill.animate(f.frames, f.opts); pill.run.onfinish = () => { pill.run = null; };
+}
+// the chosen machine's pill travels from card to card (not on a phone, where the cards are in rows you swipe)
+let cardRun = null;
+function glideCard(from, card) {
+  if (still || !el.cardpill.animate || getComputedStyle(card.parentNode).display !== 'grid') return;
+  const f = pullFrames(from, boxIn(card, el.panel));
+  if (cardRun) { cardRun.onfinish = null; cardRun.cancel(); }
+  el.panel.classList.add('gliding');
+  cardRun = el.cardpill.animate(f.frames, Object.assign({ fill: 'forwards' }, f.opts));
+  cardRun.onfinish = () => { el.panel.classList.remove('gliding'); cardRun.cancel(); cardRun = null; };   // landed: the card paints its own pill again
 }
 addEventListener('resize', () => el.controls.querySelectorAll('.seg').forEach((s) => placePill(s, false)));
 
@@ -227,8 +252,37 @@ addEventListener('dragleave', (e) => { if (!e.relatedTarget) el.drop.classList.r
 addEventListener('drop', (e) => { e.preventDefault(); el.drop.classList.remove('over'); const f = [...e.dataTransfer.files].find((x) => x.type.startsWith('image/')); if (f) setPhoto(f); else toast('Drop a picture file.'); });
 addEventListener('paste', (e) => { const it = [...(e.clipboardData ? e.clipboardData.items : [])].find((x) => x.type.startsWith('image/')); if (it) setPhoto(it.getAsFile()); });
 
+/* ---------- buttons lean toward the pointer ---------- */
+// A button is pulled a little toward the pointer while it is over it, and stretches the way it is pulled
+// (--mx, --my, --sx, --sy, read by style.css). A mouse only; one write a frame.
+{
+  let cur = null, at = null, raf = 0;
+  const frame = () => {
+    raf = 0; const node = at ? at.node : null;
+    if (cur && cur !== node) for (const k of ['--mx', '--my', '--sx', '--sy']) cur.style.removeProperty(k);
+    cur = node; if (!node) return;
+    const r = node.getBoundingClientRect(), nx = Math.max(-1, Math.min(1, (at.x - r.left - r.width / 2) / (r.width / 2))), ny = Math.max(-1, Math.min(1, (at.y - r.top - r.height / 2) / (r.height / 2)));
+    node.style.setProperty('--mx', (nx * 5).toFixed(1) + 'px'); node.style.setProperty('--my', (ny * 4).toFixed(1) + 'px');
+    node.style.setProperty('--sx', (1 + Math.abs(nx) * 0.05).toFixed(3)); node.style.setProperty('--sy', (1 + Math.abs(ny) * 0.1 - Math.abs(nx) * 0.03).toFixed(3));
+  };
+  if (!still) document.addEventListener('pointermove', (e) => {
+    const node = e.pointerType === 'mouse' && e.target.closest ? e.target.closest('.btn:not(:disabled)') : null;
+    at = node ? { node, x: e.clientX, y: e.clientY } : null;
+    if (!raf && (node || cur)) raf = requestAnimationFrame(frame);
+  }, { passive: true });
+}
+
 let toastTimer = 0;
 function toast(text) { el.toast.textContent = text; el.toast.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.toast.classList.remove('on'), 3200); }
+
+/* ---------- the Glass switch (top right) ---------- */
+// Two looks for the same page: Chalkboard's frosted look, and glass (round shapes, bright rims, inks in the sliders).
+{
+  const box = $('#glassTog');
+  const apply = () => { document.documentElement.toggleAttribute('data-glass', state.glass); box.checked = state.glass; requestAnimationFrame(() => el.controls.querySelectorAll('.seg').forEach((sg) => placePill(sg, false))); };
+  box.addEventListener('change', () => { state.glass = box.checked; remember(); apply(); });
+  apply();
+}
 
 choose(state.id, true);
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});

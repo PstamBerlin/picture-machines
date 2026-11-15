@@ -12,7 +12,9 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=55c5dab7">
+<script>/* the Glass switch is remembered; set before anything is drawn, so the page never flashes the other look */
+try { if (JSON.parse(localStorage.getItem('picture-machines-v1') || '{}').glass) document.documentElement.setAttribute('data-glass', ''); } catch (e) {}</script>
+<link rel="stylesheet" href="style.css?v=b317c2f9">
 </head>
 <body>
 <div class="mesh" aria-hidden="true"></div>
@@ -23,19 +25,20 @@
     <span class="name">Picture Machines</span>
   </a>
   <span class="inks" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-  <button class="btn ghost small" id="newBtn" hidden>New photo</button>
+  <button class="btn small" id="newBtn" hidden>New photo</button>
+  <label class="tog glasstog" title="Switch between the frosted look and the glass look"><span>Glass</span><input type="checkbox" id="glassTog" aria-label="Glass look"></label>
 </header>
 
 <main class="app">
   <section class="stage" aria-label="Your picture">
-    <div class="drop" id="drop">
+    <div class="drop glass" id="drop">
       <span class="reg tl" aria-hidden="true"></span><span class="reg tr" aria-hidden="true"></span><span class="reg bl" aria-hidden="true"></span><span class="reg br" aria-hidden="true"></span>
       <h1>One photo in.<br><span class="ink-c">Art</span>, <span class="ink-m">bricks</span> or a <span class="ink-y">3D print</span> out.</h1>
       <p class="lead">Drop a photo here, then pick a machine. Everything happens on your own device, nothing is uploaded.</p>
       <div class="row">
         <button class="btn primary" id="pickBtn">Choose a photo</button>
         <button class="btn" id="camBtn" hidden>Take a photo</button>
-        <button class="btn ghost" id="sampleBtn">Try the sample</button>
+        <button class="btn" id="sampleBtn">Try the sample</button>
       </div>
     </div>
     <div class="result" id="result" hidden>
@@ -49,7 +52,8 @@
     </div>
   </section>
 
-  <aside class="panel" aria-label="Machines and settings">
+  <aside class="panel glass" id="panel" aria-label="Machines and settings">
+    <i id="cardpill" aria-hidden="true"></i>
     <div class="group">
       <h2>Make a picture</h2>
       <div class="cards" id="picCards"></div>
@@ -59,7 +63,7 @@
       <div class="cards" id="printCards"></div>
     </div>
     <div class="settings">
-      <div class="head"><div><h2 id="machineName">Paint</h2><p id="machineBlurb"></p></div><button class="btn ghost small" id="resetBtn">Reset</button></div>
+      <div class="head"><span class="ico" id="machineIco" aria-hidden="true"></span><span class="st"><b id="machineName">Paint</b><small id="machineBlurb"></small></span><button class="btn small" id="resetBtn">Reset</button></div>
       <div id="controls"></div>
     </div>
     <div class="actions">
@@ -75,6 +79,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="file" accept="image/*" hidden>
 <input type="file" id="cam" accept="image/*" capture="environment" hidden>
-<script type="module" src="app.js?v=55c5dab7"></script>
+<script type="module" src="app.js?v=b317c2f9"></script>
 </body>
 </html>
