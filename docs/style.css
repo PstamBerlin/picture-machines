@@ -1,0 +1,183 @@
+/* Picture Machines. The look is "Print press": Aurora's grammar (a soft mesh of colour, frosted panes,
+   round shapes, springy motion) in its own colours, the three printing inks on deep navy. */
+@font-face{font-family:"Manrope";font-weight:500;font-display:swap;src:url("fonts/Manrope-500.woff2") format("woff2")}
+@font-face{font-family:"Manrope";font-weight:700;font-display:swap;src:url("fonts/Manrope-700.woff2") format("woff2")}
+@font-face{font-family:"Manrope";font-weight:800;font-display:swap;src:url("fonts/Manrope-800.woff2") format("woff2")}
+@font-face{font-family:"Unbounded";font-weight:500;font-display:swap;src:url("fonts/Unbounded-500.woff2") format("woff2")}
+@font-face{font-family:"Unbounded";font-weight:800;font-display:swap;src:url("fonts/Unbounded-800.woff2") format("woff2")}
+
+:root{
+  --bg:#0B1026; --ink:#F5F7FF; --dim:rgba(245,247,255,.68); --faint:rgba(245,247,255,.14); --line:rgba(245,247,255,.1);
+  --c:#22D3EE; --m:#F0489B; --y:#FDE047; --k:#060915;
+  --pane:rgba(18,25,62,.62); --pane-2:rgba(255,255,255,.07); --pane-3:rgba(255,255,255,.13);
+  --rim:inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 1px rgba(255,255,255,.07);
+  --accent:var(--y); --on-accent:#1B1500;
+  --r:22px; --r-s:14px;
+  --font:"Manrope",ui-sans-serif,system-ui,-apple-system,sans-serif; --display:"Unbounded","Manrope",ui-sans-serif,system-ui,sans-serif;
+  /* motion: two real springs (a soft one and a lively one) and how long they take */
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --spring:linear(0,0.037,0.131,0.258,0.398,0.539,0.669,0.783,0.878,0.953,1.008,1.047,1.07,1.081,1.083,1.079,1.07,1.06,1.048,1.036,1.025,1.016,1.009,1.003,0.998,0.996,0.994,0.993,0.993,0.994,0.994,0.995,1);
+  --pop:linear(0,0.055,0.193,0.374,0.566,0.746,0.899,1.017,1.098,1.145,1.162,1.158,1.138,1.11,1.078,1.048,1.022,1.001,0.987,0.978,0.974,0.974,0.977,0.981,0.986,0.991,0.995,0.999,1.002,1.003,1.004,1.004,1);
+  --t:520ms; --moving:1;
+}
+@media (prefers-reduced-motion: reduce){:root{--t:1ms;--moving:0} *,*::before,*::after{animation-duration:1ms!important;animation-delay:0ms!important}}
+
+*{box-sizing:border-box}
+html{color-scheme:dark;-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100dvh;background:var(--bg);color:var(--ink);font:500 15px/1.5 var(--font);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--c);outline-offset:2px;border-radius:10px}
+
+/* the background: still, and soft by itself (no blur filter, nothing drifting, so it costs nothing) */
+.mesh{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(52% 58% at 2% 4%, rgba(34,211,238,.42) 0%, transparent 72%),
+    radial-gradient(48% 52% at 100% 0%, rgba(253,224,71,.26) 0%, transparent 70%),
+    radial-gradient(64% 66% at 92% 100%, rgba(240,72,155,.46) 0%, transparent 72%),
+    radial-gradient(46% 52% at 0% 100%, rgba(124,58,237,.38) 0%, transparent 72%)}
+
+/* ---- top bar ---- */
+.bar{display:flex;align-items:center;gap:14px;padding:14px clamp(14px,3vw,28px) 6px;animation:drop var(--t) var(--spring) backwards}
+.brand{display:flex;align-items:center;gap:11px;color:inherit;text-decoration:none}
+.mark{width:38px;height:38px;border-radius:12px;box-shadow:0 6px 18px -6px rgba(0,0,0,.6);animation:turn calc(var(--t) * 1.4) var(--pop) 120ms backwards;transition:transform var(--t) var(--pop)}
+.brand:hover .mark{transform:rotate(-12deg) scale(1.08)}
+.name{font:800 17px/1 var(--display);letter-spacing:-.02em}
+/* the four inks, like the colour bar at the edge of a printed sheet */
+.inks{display:flex;gap:4px;margin-left:auto}
+.inks i{width:14px;height:14px;border-radius:4px;animation:pop var(--t) var(--pop) backwards}
+.inks i:nth-child(1){background:var(--c);animation-delay:160ms}.inks i:nth-child(2){background:var(--m);animation-delay:220ms}.inks i:nth-child(3){background:var(--y);animation-delay:280ms}.inks i:nth-child(4){background:var(--k);box-shadow:inset 0 0 0 1px var(--faint);animation-delay:340ms}
+
+/* ---- layout ---- */
+.app{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 392px;gap:18px;align-items:start;padding:10px clamp(14px,3vw,28px) 18px;max-width:1500px;width:100%;margin:0 auto}
+.stage{min-width:0;position:sticky;top:12px}
+.panel{background:var(--pane);border-radius:var(--r);box-shadow:var(--rim),0 18px 50px -24px rgba(0,0,0,.7);padding:16px;display:flex;flex-direction:column;gap:16px;animation:rise var(--t) var(--spring) 120ms backwards}
+footer{padding:6px 16px 18px;text-align:center;font-size:12px;color:var(--dim)}
+h2{margin:0 0 8px;font:800 10.5px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+
+/* ---- buttons ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 18px;border-radius:999px;font-weight:800;font-size:14px;
+  background:var(--pane-2);box-shadow:var(--rim);
+  transition:background 140ms var(--ease),transform var(--t) var(--pop),opacity 140ms var(--ease)}
+.btn:hover{background:var(--pane-3);transform:scale(1.03)}
+.btn:active{transform:scale(.97,.9);transition-duration:140ms,70ms,140ms}
+.btn.primary{background:var(--accent);color:var(--on-accent);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 10px 26px -10px rgba(253,224,71,.7)}
+.btn.primary:hover{background:#FFEA6E}
+.btn.ghost{background:transparent;box-shadow:inset 0 0 0 1px var(--faint);color:var(--dim)}
+.btn.ghost:hover{color:var(--ink);background:var(--pane-2)}
+.btn.small{min-height:32px;padding:0 13px;font-size:12.5px}
+.btn:disabled{opacity:.4;cursor:default;transform:none}
+.row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+
+/* ---- the empty stage: drop a photo ---- */
+.drop{position:relative;min-height:min(70dvh,620px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:44px 26px;
+  border-radius:calc(var(--r) + 6px);background:var(--pane);box-shadow:var(--rim),0 18px 50px -24px rgba(0,0,0,.7);animation:rise var(--t) var(--spring) 60ms backwards;
+  transition:transform var(--t) var(--pop),background 160ms var(--ease)}
+.drop.over{transform:scale(1.015);background:rgba(34,211,238,.16)}
+.drop h1{margin:0;font:800 clamp(24px,4.2vw,44px)/1.12 var(--display);letter-spacing:-.03em;max-width:15em}
+.ink-c{color:var(--c)}.ink-m{color:var(--m)}.ink-y{color:var(--y)}
+.lead{margin:0;max-width:34em;color:var(--dim);font-size:15.5px}
+/* registration marks, the crosses a printer lines the inks up with */
+.reg{position:absolute;width:26px;height:26px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--faint);opacity:.9}
+.reg::before,.reg::after{content:"";position:absolute;left:50%;top:50%;background:var(--faint)}
+.reg::before{width:38px;height:1.5px;transform:translate(-50%,-50%)}.reg::after{width:1.5px;height:38px;transform:translate(-50%,-50%)}
+.reg.tl{left:20px;top:20px}.reg.tr{right:20px;top:20px}.reg.bl{left:20px;bottom:20px}.reg.br{right:20px;bottom:20px}
+
+/* ---- the result ---- */
+.result{display:flex;flex-direction:column;gap:12px;animation:rise var(--t) var(--spring) backwards}
+.view{position:relative;width:100%;max-height:calc(100dvh - 150px);margin:0 auto;border-radius:var(--r);overflow:hidden;background:var(--k);
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 26px 70px -28px rgba(0,0,0,.85);touch-action:pan-y}
+.view canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#after{clip-path:inset(0 0 0 calc(var(--split,0) * 100%))}
+.view.fresh #after{animation:develop var(--t) var(--spring)}
+/* pull the handle to the right to see your photo; let go and it snaps back */
+.wipe{position:absolute;top:0;bottom:0;left:calc(var(--split,0) * 100%);width:44px;margin-left:-22px;cursor:ew-resize;touch-action:none;display:flex;align-items:center;justify-content:center}
+.wipe::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;background:#fff;opacity:calc(.25 + var(--pull,0) * .75);box-shadow:0 0 12px rgba(0,0,0,.5)}
+.knob{position:relative;width:34px;height:54px;border-radius:999px;background:#fff;color:var(--bg);display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.45);
+  transform:translateX(13px) scaleX(calc(1 + var(--pull,0) * .28)) scaleY(calc(1 - var(--pull,0) * .12));transition:transform var(--t) var(--pop)}
+.knob i{width:12px;height:18px;border-left:2px solid currentColor;border-right:2px solid currentColor;opacity:.55}
+.wipe.dragging .knob{transition:none}
+.view.print .wipe,.view.print #before{display:none}
+.view.print #after{clip-path:none}
+.wipe.back{transition:left var(--t) var(--pop)}
+.view.back #after{transition:clip-path var(--t) var(--pop)}
+/* working: a strip of the four inks runs along the top */
+.busy{position:absolute;left:12px;top:12px;display:flex;align-items:center;gap:10px;padding:7px 12px 7px 13px;border-radius:999px;background:rgba(11,16,38,.78);box-shadow:var(--rim);font-size:12.5px;font-weight:700;animation:pop 260ms var(--pop)}
+.busy b{width:84px;height:6px;border-radius:999px;background:var(--faint);overflow:hidden}
+.busy i{display:block;height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--c),var(--m),var(--y));transition:width 160ms linear}
+.stats{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.stats li{padding:6px 12px;border-radius:999px;background:var(--pane);box-shadow:var(--rim);font-size:12.5px;color:var(--dim);animation:pop var(--t) var(--pop) backwards}
+.stats li:nth-child(2){animation-delay:50ms}.stats li:nth-child(3){animation-delay:100ms}.stats li:nth-child(4){animation-delay:150ms}
+
+/* ---- the machines ---- */
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.card{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 4px 8px;border-radius:var(--r-s);background:var(--pane-2);box-shadow:var(--rim);
+  font-size:11.5px;font-weight:700;line-height:1.15;text-align:center;color:var(--dim);
+  transition:background 140ms var(--ease),color 140ms var(--ease),transform var(--t) var(--pop);animation:pop var(--t) var(--pop) backwards;animation-delay:calc(var(--n,0) * 34ms + 160ms)}
+.card:hover{transform:translateY(-3px) scale(1.04);color:var(--ink)}
+.card:active{transform:scale(.93);transition-duration:140ms,140ms,70ms}
+.card .thumb{position:relative;width:100%;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--k);display:grid;place-items:center}
+.card canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.card svg{width:46%;height:46%;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.card.on{background:var(--pane-3);color:var(--ink);box-shadow:inset 0 0 0 2px var(--accent),0 10px 24px -14px rgba(253,224,71,.8)}
+.card.on .thumb{animation:pop var(--t) var(--pop)}
+
+/* ---- the settings ---- */
+.settings{border-top:1px solid var(--line);padding-top:14px}
+.head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+.head h2{font-size:15px;letter-spacing:-.01em;text-transform:none;color:var(--ink);margin:0 0 3px}
+.head p{margin:0;font-size:12.5px;color:var(--dim)}
+#controls{display:flex;flex-direction:column;gap:13px}
+#controls > *{animation:drip var(--t) var(--spring) backwards;animation-delay:calc(var(--n,0) * 30ms)}
+.ctl{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.ctl .lbl{display:flex;justify-content:space-between;gap:8px;color:var(--dim);font-weight:700}
+.ctl output{color:var(--ink);font-variant-numeric:tabular-nums}
+/* a row of choices; the pill behind the chosen one is pulled across to the next (it stretches, then snaps together) */
+.seg{position:relative;display:flex;flex-wrap:wrap;gap:3px;padding:3px;border-radius:16px;background:rgba(0,0,0,.24);box-shadow:inset 0 1px 3px rgba(0,0,0,.4)}
+.seg button{position:relative;z-index:1;flex:1 1 auto;min-height:32px;padding:0 10px;border-radius:12px;font-size:12.5px;font-weight:700;color:var(--dim);transition:color 140ms var(--ease),transform var(--t) var(--pop)}
+.seg button:active{transform:scale(.94);transition-duration:140ms,70ms}
+.seg button.on{color:var(--on-accent)}
+.seg .pill{position:absolute;left:0;top:0;border-radius:12px;background:var(--accent);box-shadow:inset 0 1px 0 rgba(255,255,255,.6);pointer-events:none;will-change:transform}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:26px;margin:0;background:none;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:999px;background:linear-gradient(90deg,var(--c),var(--m) 55%,var(--y)) 0/var(--fill,50%) 100% no-repeat,rgba(0,0,0,.3);box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-7px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.45);transition:transform var(--t) var(--pop)}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.25,.9)}
+input[type=range]::-moz-range-track{height:8px;border-radius:999px;background:rgba(0,0,0,.3)}
+input[type=range]::-moz-range-progress{height:8px;border-radius:999px;background:linear-gradient(90deg,var(--c),var(--m),var(--y))}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;font-weight:700;color:var(--dim);cursor:pointer}
+.tog input{-webkit-appearance:none;appearance:none;flex:none;width:44px;height:26px;border-radius:999px;background:rgba(0,0,0,.3);box-shadow:inset 0 1px 3px rgba(0,0,0,.4);position:relative;cursor:pointer;transition:background 160ms var(--ease)}
+.tog input::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:999px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:transform var(--t) var(--pop),width 160ms var(--ease)}
+.tog input:active::after{width:26px}
+.tog input:checked{background:var(--c)}
+.tog input:checked::after{transform:translateX(18px)}
+.tog input:checked:active::after{transform:translateX(12px)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.actions .btn{flex:1 1 auto}
+.fine{margin:-6px 0 0;font-size:12px;color:var(--dim)}
+.toast{position:fixed;left:50%;bottom:22px;z-index:9;max-width:calc(100vw - 32px);padding:11px 18px;border-radius:999px;background:rgba(6,9,21,.92);box-shadow:var(--rim),0 14px 40px rgba(0,0,0,.5);font-weight:700;font-size:13.5px;
+  transform:translate(-50%,160%);visibility:hidden;transition:transform var(--t) var(--pop),visibility 0s linear var(--t)}
+.toast.on{transform:translate(-50%,0);visibility:visible;transition:transform var(--t) var(--pop),visibility 0s}
+
+@keyframes rise{from{opacity:.2;transform:translateY(30px) scale(.96)}}
+@keyframes drop{from{opacity:.2;transform:translateY(-18px)}}
+@keyframes pop{from{opacity:.2;transform:scale(.6)}}
+@keyframes turn{from{transform:scale(.3) rotate(-160deg)}}
+@keyframes drip{from{opacity:.2;transform:translateY(-10px) scale(.97)}}
+@keyframes develop{from{opacity:.35;transform:scale(1.035)}}
+
+/* ---- phones and narrow windows: the picture on top, the machines in rows you swipe ---- */
+@media (max-width: 900px){
+  .app{grid-template-columns:minmax(0,1fr);gap:12px;padding-top:6px}
+  .stage{position:static}
+  .drop{min-height:54dvh;padding:40px 18px}
+  .view{max-height:58dvh}
+  .cards{display:flex;overflow-x:auto;scroll-snap-type:x proximity;gap:8px;margin:0 -16px;padding:2px 16px 6px;scrollbar-width:none}
+  .cards::-webkit-scrollbar{display:none}
+  .card{flex:0 0 78px;scroll-snap-align:start}
+  .name{font-size:14px;white-space:nowrap}
+  .bar{gap:10px}
+  .bar .btn{white-space:nowrap;padding:0 11px}
+}
+@media (max-width: 430px){.inks{display:none}.bar .btn{margin-left:auto}}

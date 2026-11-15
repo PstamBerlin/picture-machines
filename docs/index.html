@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Picture Machines</title>
+<meta name="description" content="Drop a photo and pick a machine: it paints it, prints it as a comic, builds it from bricks, or turns it into something you can 3D print. Everything happens on your own device.">
+<meta name="theme-color" content="#0B1026">
+<meta property="og:title" content="Picture Machines">
+<meta property="og:description" content="Eleven machines for one photo: paint, comic, pixel, sketch, stained glass, bricks, poster print, and four you can 3D print.">
+<meta property="og:image" content="og.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css?v=55c5dab7">
+</head>
+<body>
+<div class="mesh" aria-hidden="true"></div>
+
+<header class="bar">
+  <a class="brand" href="./" aria-label="Picture Machines, start over">
+    <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="17" fill="#0B1026"/><g style="mix-blend-mode:screen"><circle cx="25" cy="27" r="14.5" fill="#22D3EE"/><circle cx="39" cy="27" r="14.5" fill="#F0489B"/><circle cx="32" cy="39.500" r="14.500" fill="#FDE047"/></g><circle cx="32" cy="31" r="3.400" fill="#0B1026"/></svg>
+    <span class="name">Picture Machines</span>
+  </a>
+  <span class="inks" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+  <button class="btn ghost small" id="newBtn" hidden>New photo</button>
+</header>
+
+<main class="app">
+  <section class="stage" aria-label="Your picture">
+    <div class="drop" id="drop">
+      <span class="reg tl" aria-hidden="true"></span><span class="reg tr" aria-hidden="true"></span><span class="reg bl" aria-hidden="true"></span><span class="reg br" aria-hidden="true"></span>
+      <h1>One photo in.<br><span class="ink-c">Art</span>, <span class="ink-m">bricks</span> or a <span class="ink-y">3D print</span> out.</h1>
+      <p class="lead">Drop a photo here, then pick a machine. Everything happens on your own device, nothing is uploaded.</p>
+      <div class="row">
+        <button class="btn primary" id="pickBtn">Choose a photo</button>
+        <button class="btn" id="camBtn" hidden>Take a photo</button>
+        <button class="btn ghost" id="sampleBtn">Try the sample</button>
+      </div>
+    </div>
+    <div class="result" id="result" hidden>
+      <div class="view" id="view">
+        <canvas id="before" aria-label="Your photo"></canvas>
+        <canvas id="after" aria-label="What the machine made"></canvas>
+        <div class="wipe" id="wipe" role="slider" tabindex="0" aria-label="Pull to see your photo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="knob" aria-hidden="true"><i></i></span></div>
+        <div class="busy" id="busy" hidden><span id="busyText">Working</span><b><i id="busyBar"></i></b></div>
+      </div>
+      <ul class="stats" id="stats" aria-live="polite"></ul>
+    </div>
+  </section>
+
+  <aside class="panel" aria-label="Machines and settings">
+    <div class="group">
+      <h2>Make a picture</h2>
+      <div class="cards" id="picCards"></div>
+    </div>
+    <div class="group">
+      <h2>Make a 3D print</h2>
+      <div class="cards" id="printCards"></div>
+    </div>
+    <div class="settings">
+      <div class="head"><div><h2 id="machineName">Paint</h2><p id="machineBlurb"></p></div><button class="btn ghost small" id="resetBtn">Reset</button></div>
+      <div id="controls"></div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="saveBtn" disabled>Save the picture</button>
+      <button class="btn" id="save2Btn" hidden>Save the preview</button>
+      <button class="btn" id="shareBtn" hidden>Share</button>
+    </div>
+    <p class="fine" id="note">Saving makes a full-size version first, so it can take a moment.</p>
+  </aside>
+</main>
+
+<footer>Made in Berlin by Peter Stam · no accounts, no ads, no tracking</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="file" accept="image/*" hidden>
+<input type="file" id="cam" accept="image/*" capture="environment" hidden>
+<script type="module" src="app.js?v=55c5dab7"></script>
+</body>
+</html>
