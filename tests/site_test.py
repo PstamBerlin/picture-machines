@@ -54,12 +54,26 @@ async def main():
         g2 = await p.evaluate("[document.getElementById('panel').classList.contains('gliding'), getComputedStyle(document.querySelector('.card.on')).backgroundImage.includes('gradient')]")
         check('choosing a machine pulls the pill from card to card', g1 == [True, 'visible'] and g2 == [False, True], [g1, g2])
         await p.click('.card[data-id="comic"]'); await settle(p)
-        # a button leans toward the pointer and lets go
+        # springy animations: off at first (calm, nothing leans), on with the switch next to Glass
         bb = await p.evaluate("(() => { const r = document.getElementById('resetBtn').getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; })()")
+        await p.mouse.move(bb[0] + bb[2] - 3, bb[1] + bb[3] / 2); await p.wait_for_timeout(200)
+        calm = await p.evaluate("[document.documentElement.hasAttribute('data-spring'), document.getElementById('springTog').checked, document.getElementById('resetBtn').style.getPropertyValue('--mx'), getComputedStyle(document.getElementById('resetBtn')).transform]")
+        check('springy animations are off at first: a button does not lean', calm == [False, False, '', 'none'], calm)
+        await p.mouse.move(400, 500); await p.click('#springTog'); await p.wait_for_timeout(700)
+        bb = await p.evaluate("(() => { const r = document.getElementById('resetBtn').getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; })()")   # measured again: the panel may have moved
         await p.mouse.move(bb[0] + bb[2] - 3, bb[1] + bb[3] / 2); await p.wait_for_timeout(200)
         lean = await p.evaluate("document.getElementById('resetBtn').style.getPropertyValue('--mx')")
         await p.mouse.move(400, 500); await p.wait_for_timeout(200)
-        check('a button leans toward the pointer and lets go', lean.endswith('px') and float(lean[:-2]) > 2 and await p.evaluate("document.getElementById('resetBtn').style.getPropertyValue('--mx')") == '', lean)
+        check('with springy on, a button leans toward the pointer and lets go', lean.endswith('px') and float(lean[:-2]) > 2 and await p.evaluate("document.getElementById('resetBtn').style.getPropertyValue('--mx')") == '', lean)
+        await p.wait_for_timeout(300); sl = await p.evaluate("(() => { const i = [...document.querySelectorAll('#controls input[type=range]')].find((i) => i.offsetParent); i.scrollIntoView({ block: 'center' }); const r = i.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; })()")
+        await p.mouse.move(sl[0] + sl[2] * 0.2, sl[1] + sl[3] / 2); await p.mouse.down(); pulled = []
+        for k in range(6):
+            await p.mouse.move(sl[0] + sl[2] * (0.28 + k * 0.1), sl[1] + sl[3] / 2); await p.wait_for_timeout(16)
+            pulled.append(await p.evaluate("parseFloat([...document.querySelectorAll('#controls input[type=range]')].find((i) => i.offsetParent).style.getPropertyValue('--tsx') || '1')"))
+        await p.mouse.up(); await p.wait_for_timeout(300)
+        let_go = await p.evaluate("[...document.querySelectorAll('#controls input[type=range]')].find((i) => i.offsetParent).style.getPropertyValue('--tsx')")
+        check("with springy on, a slider's knob stretches while you pull it and lets go", max(pulled) > 1.1 and let_go == '', [pulled, let_go])
+        await p.click('#springTog'); await p.wait_for_timeout(100)
         await p.evaluate("(() => { const i = document.querySelector('[data-c=dots] input'); i.value = 2.4; i.dispatchEvent(new Event('input', { bubbles: true })); })()"); await settle(p); c3 = await p.evaluate(SIG)
         await p.click('[data-c=frame] input'); await settle(p); c4 = await p.evaluate(SIG)
         check('a slider and a switch change the picture', b2 != c3 and c3 != c4)
@@ -108,8 +122,10 @@ async def main():
         await q.goto(URL); await q.wait_for_timeout(800)
         check('phone: a Take a photo button', await q.evaluate("!document.getElementById('camBtn').hidden && document.getElementById('cam').getAttribute('capture') === 'environment'"))
         await q.tap('#sampleBtn'); await settle(q)
-        fit = await q.evaluate("({ over: document.documentElement.scrollWidth - document.documentElement.clientWidth, view: document.getElementById('view').getBoundingClientRect().width, bar: document.querySelector('.bar').getBoundingClientRect().height, w: window.pm.state.last.w })")
-        check('phone: nothing sticks out sideways, the header is one line, the picture fills the width', fit['over'] == 0 and fit['view'] > 300 and fit['bar'] < 70 and fit['w'] <= 440, fit)
+        fit = await q.evaluate("({ over: document.documentElement.scrollWidth - document.documentElement.clientWidth, view: document.getElementById('view').getBoundingClientRect().width, bar: document.querySelector('.bar').getBoundingClientRect().height, w: window.pm.state.last.w, rows: (() => { const t = (q) => Math.round(document.querySelector(q).getBoundingClientRect().top); return [t('.brand'), t('#newBtn'), t('#springTog'), t('#glassTog')]; })(), names: [...document.querySelectorAll('.glasstog span')].map((x) => getComputedStyle(x).display !== 'none') })")
+        r = fit['rows']
+        check('phone: nothing sticks out sideways, the name and New photo on one line, the two switches with their names on a row below, the picture fills the width',
+              fit['over'] == 0 and fit['view'] > 300 and fit['bar'] < 110 and fit['w'] <= 440 and abs(r[0] - r[1]) < 12 and abs(r[2] - r[3]) < 4 and r[2] > r[0] + 20 and fit['names'] == [True, True], fit)
         await q.tap('.card[data-id="bricks"]'); await settle(q)
         check('phone: a machine runs on a tap', (await q.evaluate("window.pm.state.last.id")) == 'bricks' and not perr, perr)
         await b.close()

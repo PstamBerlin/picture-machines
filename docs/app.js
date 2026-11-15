@@ -1,7 +1,7 @@
 // Picture Machines: the page. It holds the photo, builds the machine cards and the controls from
 // machines.js, and asks the worker to run a machine whenever something changes. A small preview is
 // made while you play with the settings; the full-size picture is only made when you save.
-import { MACHINES, BY_ID, defaults } from './machines.js?v=b317c2f9';
+import { MACHINES, BY_ID, defaults } from './machines.js?v=3708eb75';
 
 const $ = (s) => document.querySelector(s);
 const el = { drop: $('#drop'), result: $('#result'), view: $('#view'), before: $('#before'), after: $('#after'), wipe: $('#wipe'), busy: $('#busy'), busyText: $('#busyText'), busyBar: $('#busyBar'), stats: $('#stats'),
@@ -12,8 +12,8 @@ const coarse = matchMedia('(pointer: coarse)').matches, still = matchMedia('(pre
 const SIZE = { preview: coarse ? 440 : 600, full: coarse ? 1280 : 1600, print: 900, thumb: 132, keep: 2400 };
 const LS = 'picture-machines-v1';
 const saved = (() => { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch (e) { return {}; } })();
-const state = { id: BY_ID[saved.id] ? saved.id : 'paint', opts: saved.opts && typeof saved.opts === 'object' ? saved.opts : {}, glass: !!saved.glass, photo: null, last: null };
-const remember = () => { try { localStorage.setItem(LS, JSON.stringify({ id: state.id, opts: state.opts, glass: state.glass })); } catch (e) { /* private window: nothing is remembered */ } };
+const state = { id: BY_ID[saved.id] ? saved.id : 'paint', opts: saved.opts && typeof saved.opts === 'object' ? saved.opts : {}, glass: !!saved.glass, spring: !!saved.spring, photo: null, last: null };
+const remember = () => { try { localStorage.setItem(LS, JSON.stringify({ id: state.id, opts: state.opts, glass: state.glass, spring: state.spring })); } catch (e) { /* private window: nothing is remembered */ } };
 const optsOf = (id) => { const o = defaults(id), mine = state.opts[id] || {}; for (const c of BY_ID[id].controls) if (c.id in mine) o[c.id] = mine[c.id]; return o; };
 
 /* ---------- the worker ---------- */
@@ -23,7 +23,7 @@ function runner() {
   let wk = null, job = 0, drop = null;
   return (id, src, opts, onProgress) => new Promise((done, fail) => {
     if (drop) { wk.terminate(); wk = null; drop(new Error('stale')); drop = null; }
-    if (!wk) wk = new Worker('worker.js?v=b317c2f9', { type: 'module' });
+    if (!wk) wk = new Worker('worker.js?v=3708eb75', { type: 'module' });
     const mine = ++job; drop = fail;
     wk.onmessage = (e) => { const m = e.data; if (m.job !== mine) return; if (m.progress !== undefined) { if (onProgress) onProgress(m.progress); return; } drop = null; if (m.ok) done(m); else fail(new Error(m.error)); };
     wk.onerror = (e) => { drop = null; wk = null; fail(new Error(e.message || 'the worker stopped')); };
@@ -252,9 +252,9 @@ addEventListener('dragleave', (e) => { if (!e.relatedTarget) el.drop.classList.r
 addEventListener('drop', (e) => { e.preventDefault(); el.drop.classList.remove('over'); const f = [...e.dataTransfer.files].find((x) => x.type.startsWith('image/')); if (f) setPhoto(f); else toast('Drop a picture file.'); });
 addEventListener('paste', (e) => { const it = [...(e.clipboardData ? e.clipboardData.items : [])].find((x) => x.type.startsWith('image/')); if (it) setPhoto(it.getAsFile()); });
 
-/* ---------- buttons lean toward the pointer ---------- */
-// A button is pulled a little toward the pointer while it is over it, and stretches the way it is pulled
-// (--mx, --my, --sx, --sy, read by style.css). A mouse only; one write a frame.
+/* ---------- springy animations: buttons lean toward the pointer ---------- */
+// Only with the Springy switch on. A button (or a choice in a row) is pulled toward the pointer while it is over
+// it, and stretches the way it is pulled (--mx, --my, --sx, --sy, read by style.css). A mouse only; one write a frame.
 {
   let cur = null, at = null, raf = 0;
   const frame = () => {
@@ -262,11 +262,12 @@ addEventListener('paste', (e) => { const it = [...(e.clipboardData ? e.clipboard
     if (cur && cur !== node) for (const k of ['--mx', '--my', '--sx', '--sy']) cur.style.removeProperty(k);
     cur = node; if (!node) return;
     const r = node.getBoundingClientRect(), nx = Math.max(-1, Math.min(1, (at.x - r.left - r.width / 2) / (r.width / 2))), ny = Math.max(-1, Math.min(1, (at.y - r.top - r.height / 2) / (r.height / 2)));
-    node.style.setProperty('--mx', (nx * 5).toFixed(1) + 'px'); node.style.setProperty('--my', (ny * 4).toFixed(1) + 'px');
-    node.style.setProperty('--sx', (1 + Math.abs(nx) * 0.05).toFixed(3)); node.style.setProperty('--sy', (1 + Math.abs(ny) * 0.1 - Math.abs(nx) * 0.03).toFixed(3));
+    const big = node.classList.contains('btn') ? 1 : 0.5;
+    node.style.setProperty('--mx', (nx * 7 * big).toFixed(1) + 'px'); node.style.setProperty('--my', (ny * 5 * big).toFixed(1) + 'px');
+    node.style.setProperty('--sx', (1 + Math.abs(nx) * 0.07 * big).toFixed(3)); node.style.setProperty('--sy', (1 + Math.abs(ny) * 0.12 * big - Math.abs(nx) * 0.04 * big).toFixed(3));
   };
   if (!still) document.addEventListener('pointermove', (e) => {
-    const node = e.pointerType === 'mouse' && e.target.closest ? e.target.closest('.btn:not(:disabled)') : null;
+    const node = state.spring && e.pointerType === 'mouse' && e.target.closest ? e.target.closest('.btn:not(:disabled), .seg button') : null;
     at = node ? { node, x: e.clientX, y: e.clientY } : null;
     if (!raf && (node || cur)) raf = requestAnimationFrame(frame);
   }, { passive: true });
@@ -274,6 +275,35 @@ addEventListener('paste', (e) => { const it = [...(e.clipboardData ? e.clipboard
 
 let toastTimer = 0;
 function toast(text) { el.toast.textContent = text; el.toast.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.toast.classList.remove('on'), 3200); }
+
+/* ---------- springy animations: a slider's knob is really pulled ---------- */
+// While you drag a slider, its knob stretches the way it moves and trails a little behind, the faster the more;
+// when you stop, it lets go and springs back (style.css). Only with the Springy switch on.
+{
+  const runs = new WeakMap();
+  document.addEventListener('input', (e) => {
+    const r = e.target; if (!state.spring || still || r.type !== 'range') return;
+    const now = performance.now(), v = +r.value, span = (+r.max - +r.min) || 1, last = runs.get(r) || { v, t: now - 16, idle: 0 };
+    const speed = Math.max(-1, Math.min(1, ((v - last.v) / span) / Math.max(8, now - last.t) * 60));   // a full sweep in a second is about 1
+    const k = Math.min(1, Math.abs(speed) * 4);
+    r.classList.add('pulling');
+    r.style.setProperty('--tx', (-Math.sign(speed) * k * 4).toFixed(1) + 'px');
+    r.style.setProperty('--tsx', (1 + k * 0.55).toFixed(3)); r.style.setProperty('--tsy', (1 - k * 0.24).toFixed(3));
+    clearTimeout(last.idle);
+    const idle = setTimeout(() => { r.classList.remove('pulling'); for (const n of ['--tx', '--tsx', '--tsy']) r.style.removeProperty(n); }, 90);
+    runs.set(r, { v, t: now, idle });
+  });
+}
+
+/* ---------- the Springy switch (top right) ---------- */
+// Off (the start): calm. When you change something the pill is still pulled across, but nothing leans, squashes,
+// overshoots or stretches. On: buttons lean and squash, small things pop, sliders stretch while you pull them.
+{
+  const box = $('#springTog');
+  const apply = () => { document.documentElement.toggleAttribute('data-spring', state.spring); box.checked = state.spring; };
+  box.addEventListener('change', () => { state.spring = box.checked; remember(); apply(); });
+  apply();
+}
 
 /* ---------- the Glass switch (top right) ---------- */
 // Two looks for the same page: Chalkboard's frosted look, and glass (round shapes, bright rims, inks in the sliders).

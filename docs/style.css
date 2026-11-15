@@ -251,5 +251,32 @@ html[data-glass] input[type=range]:active::-webkit-slider-thumb{background:#fff}
   .btn{height:40px}
   .bar .btn{height:32px}
 }
-@media (max-width: 430px){.inks{display:none}.bar .btn{margin-left:auto}.glasstog span{display:none}}
+@media (max-width: 430px){.inks{display:none}.bar .btn{margin-left:auto}
+  /* a phone has no room for both switches beside the name: they get a small row of their own, with their names */
+  .bar{flex-wrap:wrap;height:auto;min-height:54px;padding-top:9px;padding-bottom:9px;row-gap:8px}
+  .bar::after{content:"";order:4;flex-basis:100%;height:0}
+  .springtog{order:5;margin-left:auto}.glasstog:not(.springtog){order:6}
+  .glasstog{font-size:9px}
+  html[data-glass] .bar{border-radius:24px;padding-top:9px;padding-bottom:9px}}
 @media (max-width: 900px){html[data-glass] .bar{margin-top:8px}}
+
+/* ---- springy animations: a switch in the top bar, off at first ----
+   Off: calm. Changing something still pulls the pill across (app.js), but nothing leans, squashes, overshoots
+   or stretches: every transition settles without bouncing. On: buttons and choices lean toward the pointer and
+   squash when pressed, switches stretch their knob, icons pop, and a slider's knob is pulled while you drag it. */
+html:not([data-spring]){--pop:var(--ease-out)}
+html:not([data-spring]) .btn,html:not([data-spring]) .btn:active:not(:disabled),
+html:not([data-spring]) .card:hover:not(.on),html:not([data-spring]) .card:active,html:not([data-spring]) .card:hover .thumb,
+html:not([data-spring]) .seg button:active,html:not([data-spring]) .head:hover .ico,html:not([data-spring]) .brand:hover .mark{transform:none}
+html:not([data-spring]) .ico.popped{animation:none}
+html:not([data-spring]) input[type=range]:active::-webkit-slider-thumb{transform:none}
+html:not([data-spring]) .tog input:active::after{width:16px}
+html:not([data-spring]) .tog input:checked:active::after{transform:translateX(16px)}
+html[data-spring] .seg button{transform:translate(var(--mx,0px),var(--my,0px)) scale(var(--sx,1),var(--sy,1))}
+html[data-spring] .seg button:active{transform:translate(var(--mx,0px),var(--my,0px)) scale(1.06,.82)}
+html[data-spring] .btn:active:not(:disabled){transform:translate(var(--mx,0px),var(--my,0px)) scale(1.07,.82)}
+html[data-spring] input[type=range]::-webkit-slider-thumb{transform:translateX(var(--tx,0px)) scale(var(--tsx,1),var(--tsy,1))}
+html[data-spring] input[type=range]:active::-webkit-slider-thumb{transform:translateX(var(--tx,0px)) scale(calc(var(--tsx,1) * 1.3),calc(var(--tsy,1) * .84))}
+html[data-spring] input[type=range].pulling::-webkit-slider-thumb{transition-duration:var(--speed),90ms}
+html[data-spring] .tog input:active::after{width:24px}
+html[data-spring] .tog input:checked:active::after{transform:translateX(8px)}

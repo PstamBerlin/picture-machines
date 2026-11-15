@@ -12,9 +12,9 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<script>/* the Glass switch is remembered; set before anything is drawn, so the page never flashes the other look */
-try { if (JSON.parse(localStorage.getItem('picture-machines-v1') || '{}').glass) document.documentElement.setAttribute('data-glass', ''); } catch (e) {}</script>
-<link rel="stylesheet" href="style.css?v=b317c2f9">
+<script>/* the Springy and Glass switches are remembered; set before anything is drawn, so the page never flashes the other look */
+try { const s = JSON.parse(localStorage.getItem('picture-machines-v1') || '{}'); if (s.glass) document.documentElement.setAttribute('data-glass', ''); if (s.spring) document.documentElement.setAttribute('data-spring', ''); } catch (e) {}</script>
+<link rel="stylesheet" href="style.css?v=3708eb75">
 </head>
 <body>
 <div class="mesh" aria-hidden="true"></div>
@@ -26,6 +26,7 @@ try { if (JSON.parse(localStorage.getItem('picture-machines-v1') || '{}').glass)
   </a>
   <span class="inks" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
   <button class="btn small" id="newBtn" hidden>New photo</button>
+  <label class="tog glasstog springtog" title="Springy animations: buttons lean and squash, sliders stretch while you pull them"><span>Springy animations</span><input type="checkbox" id="springTog" aria-label="Springy animations"></label>
   <label class="tog glasstog" title="Switch between the frosted look and the glass look"><span>Glass</span><input type="checkbox" id="glassTog" aria-label="Glass look"></label>
 </header>
 
@@ -79,6 +80,6 @@ try { if (JSON.parse(localStorage.getItem('picture-machines-v1') || '{}').glass)
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="file" accept="image/*" hidden>
 <input type="file" id="cam" accept="image/*" capture="environment" hidden>
-<script type="module" src="app.js?v=b317c2f9"></script>
+<script type="module" src="app.js?v=3708eb75"></script>
 </body>
 </html>
