@@ -280,3 +280,17 @@ html[data-spring] input[type=range]:active::-webkit-slider-thumb{transform:trans
 html[data-spring] input[type=range].pulling::-webkit-slider-thumb{transition-duration:var(--speed),90ms}
 html[data-spring] .tog input:active::after{width:24px}
 html[data-spring] .tog input:checked:active::after{transform:translateX(8px)}
+
+/* ---- the Glass look: Apple-style bubble ----
+   The chosen option sits inside a clear glass bubble instead of a solid yellow pill: a white wash that is
+   brighter at the top, a thin bright rim with a glint on the top-left and bottom-right edges, a soft
+   shadow, and a little bigger than the track so it pops out of it. No backdrop filter: the bubble moves,
+   and nothing that moves is filtered. The pull and stretch (app.js) is unchanged. */
+html[data-glass] .seg{overflow:visible;background:rgba(0,0,0,.32)}
+html[data-glass] .seg .pill,html[data-glass] .card.on,html[data-glass] #cardpill{
+  background:radial-gradient(120% 160% at 28% -20%,rgba(255,255,255,.34),rgba(255,255,255,.10) 48%,rgba(255,255,255,.05) 70%,rgba(255,255,255,.14) 100%);
+  border-color:transparent;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.36),inset 1.5px 2px 1.5px -1px rgba(255,255,255,.95),inset -1.5px -2px 1.5px -1px rgba(255,255,255,.5),
+    inset 0 -6px 10px -6px rgba(255,255,255,.22),0 8px 18px -6px rgba(0,0,0,.6),0 0 0 .5px rgba(0,0,0,.25)}
+html[data-glass] .seg .pill{transform:scale(1.05,1.22)}
+html[data-glass] .seg button.on{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}

@@ -1,7 +1,7 @@
 // Picture Machines: the page. It holds the photo, builds the machine cards and the controls from
 // machines.js, and asks the worker to run a machine whenever something changes. A small preview is
 // made while you play with the settings; the full-size picture is only made when you save.
-import { MACHINES, BY_ID, defaults } from './machines.js?v=3708eb75';
+import { MACHINES, BY_ID, defaults } from './machines.js?v=0aa5019d';
 
 const $ = (s) => document.querySelector(s);
 const el = { drop: $('#drop'), result: $('#result'), view: $('#view'), before: $('#before'), after: $('#after'), wipe: $('#wipe'), busy: $('#busy'), busyText: $('#busyText'), busyBar: $('#busyBar'), stats: $('#stats'),
@@ -23,7 +23,7 @@ function runner() {
   let wk = null, job = 0, drop = null;
   return (id, src, opts, onProgress) => new Promise((done, fail) => {
     if (drop) { wk.terminate(); wk = null; drop(new Error('stale')); drop = null; }
-    if (!wk) wk = new Worker('worker.js?v=3708eb75', { type: 'module' });
+    if (!wk) wk = new Worker('worker.js?v=0aa5019d', { type: 'module' });
     const mine = ++job; drop = fail;
     wk.onmessage = (e) => { const m = e.data; if (m.job !== mine) return; if (m.progress !== undefined) { if (onProgress) onProgress(m.progress); return; } drop = null; if (m.ok) done(m); else fail(new Error(m.error)); };
     wk.onerror = (e) => { drop = null; wk = null; fail(new Error(e.message || 'the worker stopped')); };
