@@ -1,7 +1,7 @@
 // Picture Machines: the page. It holds the photo, builds the machine cards and the controls from
 // machines.js, and asks the worker to run a machine whenever something changes. A small preview is
 // made while you play with the settings; the full-size picture is only made when you save.
-import { MACHINES, BY_ID, defaults } from './machines.js?v=0aa5019d';
+import { MACHINES, BY_ID, defaults } from './machines.js?v=e5525337';
 
 const $ = (s) => document.querySelector(s);
 const el = { drop: $('#drop'), result: $('#result'), view: $('#view'), before: $('#before'), after: $('#after'), wipe: $('#wipe'), busy: $('#busy'), busyText: $('#busyText'), busyBar: $('#busyBar'), stats: $('#stats'),
@@ -23,7 +23,7 @@ function runner() {
   let wk = null, job = 0, drop = null;
   return (id, src, opts, onProgress) => new Promise((done, fail) => {
     if (drop) { wk.terminate(); wk = null; drop(new Error('stale')); drop = null; }
-    if (!wk) wk = new Worker('worker.js?v=0aa5019d', { type: 'module' });
+    if (!wk) wk = new Worker('worker.js?v=e5525337', { type: 'module' });
     const mine = ++job; drop = fail;
     wk.onmessage = (e) => { const m = e.data; if (m.job !== mine) return; if (m.progress !== undefined) { if (onProgress) onProgress(m.progress); return; } drop = null; if (m.ok) done(m); else fail(new Error(m.error)); };
     wk.onerror = (e) => { drop = null; wk = null; fail(new Error(e.message || 'the worker stopped')); };
@@ -183,7 +183,16 @@ function placePill(seg, animate) {
   Object.assign(pill.style, { left: to.x + 'px', top: to.y + 'px', width: to.w + 'px', height: to.h + 'px' });
   if (!animate || !from || still || !pill.animate) return;
   if (pill.run) pill.run.cancel();                    // a move that is still on its way is dropped for the new one
+  if (pill.lift) pill.lift.cancel();
   const f = pullFrames(pill.now || from, to); pill.run = pill.animate(f.frames, f.opts); pill.run.onfinish = () => { pill.run = null; };
+  pill.lift = lift(pill, f.opts.duration);
+}
+// Glass look only: the bubble swells while it travels and settles back to its normal size when it lands,
+// like Apple's. At rest it is never bigger. A transform only, so the pull and stretch above are untouched.
+function lift(node, duration, sx = 1.1, sy = 1.62) {
+  if (still || !node.animate || !document.documentElement.hasAttribute('data-glass')) return null;
+  return node.animate([{ transform: 'none' }, { transform: `scale(${sx}, ${sy})`, offset: 0.3 }, { transform: `scale(${(1 + (sx - 1) * 0.4).toFixed(3)}, ${(1 + (sy - 1) * 0.4).toFixed(3)})`, offset: 0.7 }, { transform: 'none' }],
+    { duration, easing: 'cubic-bezier(.3,.7,.4,1)' });
 }
 // the chosen machine's pill travels from card to card (not on a phone, where the cards are in rows you swipe)
 let cardRun = null;
@@ -193,6 +202,7 @@ function glideCard(from, card) {
   if (cardRun) { cardRun.onfinish = null; cardRun.cancel(); }
   el.panel.classList.add('gliding');
   cardRun = el.cardpill.animate(f.frames, Object.assign({ fill: 'forwards' }, f.opts));
+  lift(el.cardpill, f.opts.duration, 1.08, 1.14);
   cardRun.onfinish = () => { el.panel.classList.remove('gliding'); cardRun.cancel(); cardRun = null; };   // landed: the card paints its own pill again
 }
 addEventListener('resize', () => el.controls.querySelectorAll('.seg').forEach((s) => placePill(s, false)));
