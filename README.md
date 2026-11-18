@@ -17,7 +17,7 @@ A plain static site in `docs/`, no build step.
 
 | File | What it is |
 |---|---|
-| `index.html`, `style.css` | the page and its "Print press" look |
+| `index.html`, `style.css` | the page and its looks: **Poster** (the default since 18 Nov 2026, the block at the end of `style.css`, `html[data-style="poster"]`), the frosted **Old look** (switch in the top bar), and **Glass** for either one |
 | `app.js` | the page: the photo, the cards, the controls, saving |
 | `machines.js` | the list of machines and the knobs each one has |
 | `worker.js` | runs a machine off the page's thread |

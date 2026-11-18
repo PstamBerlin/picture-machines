@@ -1,7 +1,7 @@
 /* Picture Machines works without a connection once it has been opened. The network is asked first, so a new
    version always wins; the stored copy is only used when there is no network.
    VERSION is written by tools/stamp.py from the site's contents, so every deploy renews the offline copy. */
-const VERSION = "pictures-480fa59c";
+const VERSION = "pictures-e8a36fc0";
 const FILES = ["./", "index.html", "style.css", "app.js", "machines.js", "worker.js", "lib.js", "m2d.js", "m3d.js", "sample.jpg", "icon.svg", "icon-192.png", "manifest.webmanifest",
   "fonts/ZillaSlab-400.woff2", "fonts/ZillaSlab-600.woff2", "fonts/ZillaSlab-700.woff2", "fonts/AlfaSlabOne.woff2"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())); });

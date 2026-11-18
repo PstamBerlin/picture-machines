@@ -51,7 +51,7 @@ async def main():
         await p.click('.card[data-id="poster"]'); await p.wait_for_timeout(140)
         g1 = await p.evaluate("[document.getElementById('panel').classList.contains('gliding'), getComputedStyle(document.getElementById('cardpill')).visibility]")
         await p.wait_for_timeout(1000)
-        g2 = await p.evaluate("[document.getElementById('panel').classList.contains('gliding'), getComputedStyle(document.querySelector('.card.on')).backgroundImage.includes('gradient')]")
+        g2 = await p.evaluate("[document.getElementById('panel').classList.contains('gliding'), (() => { const cs = getComputedStyle(document.querySelector('.card.on')); return cs.backgroundImage.includes('gradient') || cs.boxShadow.includes('255, 255, 255'); })()]")
         check('choosing a machine pulls the pill from card to card', g1 == [True, 'visible'] and g2 == [False, True], [g1, g2])
         await p.click('.card[data-id="comic"]'); await settle(p)
         # springy animations: off at first (calm, nothing leans), on with the switch next to Glass
@@ -103,14 +103,22 @@ async def main():
         await settle(p)
         # the Glass switch, top right: on, a different look, remembered; off again
         tg = await p.evaluate("(() => { const r = document.getElementById('glassTog').getBoundingClientRect(); return [document.documentElement.hasAttribute('data-glass'), r.right > innerWidth - 60, r.top < 60]; })()")
-        r0 = await p.evaluate("getComputedStyle(document.querySelector('#resetBtn')).borderTopLeftRadius")
+        r0 = await p.evaluate("getComputedStyle(document.querySelector('.bar')).borderTopLeftRadius")   # Poster: a square bar; glass makes it a capsule
         await p.click('#glassTog'); await p.wait_for_timeout(300)
         g = await p.evaluate("[document.documentElement.hasAttribute('data-glass'), getComputedStyle(document.querySelector('#resetBtn')).borderTopLeftRadius, getComputedStyle(document.querySelector('.bar')).borderTopLeftRadius, JSON.parse(localStorage.getItem('picture-machines-v1')).glass]")
-        check('the Glass switch sits top right, is off at first, and turns the page to glass', tg == [False, True, True] and r0 == '9px' and g == [True, '999px', '999px', True], [tg, r0, g])
+        check('the Glass switch sits top right, is off at first, and turns the page to glass', tg == [False, True, True] and r0 == '0px' and g == [True, '999px', '999px', True], [tg, r0, g])
         await p.reload(); await p.wait_for_timeout(600)
         check('glass is remembered', await p.evaluate("document.documentElement.hasAttribute('data-glass') && document.getElementById('glassTog').checked"))
         await p.click('#glassTog'); await p.wait_for_timeout(200)
         check('and switches back to the frosted look', not await p.evaluate("document.documentElement.hasAttribute('data-glass')"))
+        # Poster is the look at first; the Old look switch puts the frosted look back, is remembered, and goes off again
+        po = await p.evaluate("[document.documentElement.dataset.style || '', getComputedStyle(document.querySelector('.card')).backgroundColor, document.getElementById('oldTog').checked]")
+        await p.click('#oldTog'); await p.wait_for_timeout(250)
+        ol = await p.evaluate("[document.documentElement.dataset.style || '', getComputedStyle(document.querySelector('.bar')).borderBottomWidth, JSON.parse(localStorage.getItem('picture-machines-v1')).old]")
+        await p.reload(); await p.wait_for_timeout(600)
+        ol2 = await p.evaluate("[document.documentElement.dataset.style || '', document.getElementById('oldTog').checked]")
+        await p.click('#oldTog'); await p.wait_for_timeout(200)
+        check('Poster is the look at first, Old look switches back to frosted and is remembered', po[0] == 'poster' and po[1] != 'rgba(0, 0, 0, 0)' and not po[2] and ol == ['', '1px', True] and ol2 == ['', True] and await p.evaluate("document.documentElement.dataset.style") == 'poster', [po, ol, ol2])
         await p.click('#sampleBtn'); await settle(p)
         # a file that is not a picture
         await p.evaluate("window.pm.setPhoto(new Blob(['not a picture'], { type: 'text/plain' }))"); await p.wait_for_timeout(400)
@@ -124,8 +132,8 @@ async def main():
         await q.tap('#sampleBtn'); await settle(q)
         fit = await q.evaluate("({ over: document.documentElement.scrollWidth - document.documentElement.clientWidth, view: document.getElementById('view').getBoundingClientRect().width, bar: document.querySelector('.bar').getBoundingClientRect().height, w: window.pm.state.last.w, rows: (() => { const t = (q) => Math.round(document.querySelector(q).getBoundingClientRect().top); return [t('.brand'), t('#newBtn'), t('#springTog'), t('#glassTog')]; })(), names: [...document.querySelectorAll('.glasstog span')].map((x) => getComputedStyle(x).display !== 'none') })")
         r = fit['rows']
-        check('phone: nothing sticks out sideways, the name and New photo on one line, the two switches with their names on a row below, the picture fills the width',
-              fit['over'] == 0 and fit['view'] > 300 and fit['bar'] < 110 and fit['w'] <= 440 and abs(r[0] - r[1]) < 12 and abs(r[2] - r[3]) < 4 and r[2] > r[0] + 20 and fit['names'] == [True, True], fit)
+        check('phone: nothing sticks out sideways, the name and New photo on one line, the three switches with their names on a row below, the picture fills the width',
+              fit['over'] == 0 and fit['view'] > 300 and fit['bar'] < 110 and fit['w'] <= 440 and abs(r[0] - r[1]) < 12 and abs(r[2] - r[3]) < 4 and r[2] > r[0] + 20 and fit['names'] == [True, True, True], fit)
         await q.tap('.card[data-id="bricks"]'); await settle(q)
         check('phone: a machine runs on a tap', (await q.evaluate("window.pm.state.last.id")) == 'bricks' and not perr, perr)
         await b.close()

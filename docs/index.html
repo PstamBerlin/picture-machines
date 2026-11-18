@@ -13,8 +13,8 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <script>/* the Springy and Glass switches are remembered; set before anything is drawn, so the page never flashes the other look */
-try { const s = JSON.parse(localStorage.getItem('picture-machines-v1') || '{}'); if (s.glass) document.documentElement.setAttribute('data-glass', ''); if (s.spring) document.documentElement.setAttribute('data-spring', ''); } catch (e) {}</script>
-<link rel="stylesheet" href="style.css?v=480fa59c">
+try { const s = JSON.parse(localStorage.getItem('picture-machines-v1') || '{}'); if (s.glass) document.documentElement.setAttribute('data-glass', ''); if (!s.old) document.documentElement.setAttribute('data-style', 'poster'); if (s.spring) document.documentElement.setAttribute('data-spring', ''); } catch (e) {}</script>
+<link rel="stylesheet" href="style.css?v=e8a36fc0">
 </head>
 <body>
 <div class="mesh" aria-hidden="true"></div>
@@ -26,6 +26,7 @@ try { const s = JSON.parse(localStorage.getItem('picture-machines-v1') || '{}');
   </a>
   <span class="inks" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
   <button class="btn small" id="newBtn" hidden>New photo</button>
+  <label class="tog glasstog oldtog" title="Switch back to the frosted look from before"><span>Old look</span><input type="checkbox" id="oldTog" aria-label="Old look"></label>
   <label class="tog glasstog springtog" title="Springy animations: buttons lean and squash, sliders stretch while you pull them"><span>Springy animations</span><input type="checkbox" id="springTog" aria-label="Springy animations"></label>
   <label class="tog glasstog" title="Switch between the frosted look and the glass look"><span>Glass</span><input type="checkbox" id="glassTog" aria-label="Glass look"></label>
 </header>
@@ -80,6 +81,6 @@ try { const s = JSON.parse(localStorage.getItem('picture-machines-v1') || '{}');
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="file" accept="image/*" hidden>
 <input type="file" id="cam" accept="image/*" capture="environment" hidden>
-<script type="module" src="app.js?v=480fa59c"></script>
+<script type="module" src="app.js?v=e8a36fc0"></script>
 </body>
 </html>

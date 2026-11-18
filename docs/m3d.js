@@ -1,7 +1,7 @@
 // Picture Machines: the machines that make something you can 3D print. Each one turns the picture into
 // a grid of little columns (how tall the plastic is at every spot), and one mesh builder turns any such
 // grid into a watertight STL file. They give back { out (a preview picture), stats, stl, file }.
-import { clamp, lerp, smooth, pic, luma, blurPlane, resize, flatten, rgb2lab, distance } from './lib.js?v=480fa59c';
+import { clamp, lerp, smooth, pic, luma, blurPlane, resize, flatten, rgb2lab, distance } from './lib.js?v=e8a36fc0';
 
 /* ---- the mesh builder -------------------------------------------------------------------------
    nx × ny cells of `res` mm. inside[q] says whether a cell is plastic, H[q] how tall it is (mm).

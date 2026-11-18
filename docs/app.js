@@ -1,7 +1,7 @@
 // Picture Machines: the page. It holds the photo, builds the machine cards and the controls from
 // machines.js, and asks the worker to run a machine whenever something changes. A small preview is
 // made while you play with the settings; the full-size picture is only made when you save.
-import { MACHINES, BY_ID, defaults } from './machines.js?v=480fa59c';
+import { MACHINES, BY_ID, defaults } from './machines.js?v=e8a36fc0';
 
 const $ = (s) => document.querySelector(s);
 const el = { drop: $('#drop'), result: $('#result'), view: $('#view'), before: $('#before'), after: $('#after'), wipe: $('#wipe'), busy: $('#busy'), busyText: $('#busyText'), busyBar: $('#busyBar'), stats: $('#stats'),
@@ -12,8 +12,8 @@ const coarse = matchMedia('(pointer: coarse)').matches, still = matchMedia('(pre
 const SIZE = { preview: coarse ? 440 : 600, full: coarse ? 1280 : 1600, print: 900, thumb: 132, keep: 2400 };
 const LS = 'picture-machines-v1';
 const saved = (() => { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch (e) { return {}; } })();
-const state = { id: BY_ID[saved.id] ? saved.id : 'paint', opts: saved.opts && typeof saved.opts === 'object' ? saved.opts : {}, glass: !!saved.glass, spring: !!saved.spring, photo: null, last: null };
-const remember = () => { try { localStorage.setItem(LS, JSON.stringify({ id: state.id, opts: state.opts, glass: state.glass, spring: state.spring })); } catch (e) { /* private window: nothing is remembered */ } };
+const state = { id: BY_ID[saved.id] ? saved.id : 'paint', opts: saved.opts && typeof saved.opts === 'object' ? saved.opts : {}, glass: !!saved.glass, spring: !!saved.spring, old: !!saved.old, photo: null, last: null };
+const remember = () => { try { localStorage.setItem(LS, JSON.stringify({ id: state.id, opts: state.opts, glass: state.glass, spring: state.spring, old: state.old })); } catch (e) { /* private window: nothing is remembered */ } };
 const optsOf = (id) => { const o = defaults(id), mine = state.opts[id] || {}; for (const c of BY_ID[id].controls) if (c.id in mine) o[c.id] = mine[c.id]; return o; };
 
 /* ---------- the worker ---------- */
@@ -23,7 +23,7 @@ function runner() {
   let wk = null, job = 0, drop = null;
   return (id, src, opts, onProgress) => new Promise((done, fail) => {
     if (drop) { wk.terminate(); wk = null; drop(new Error('stale')); drop = null; }
-    if (!wk) wk = new Worker('worker.js?v=480fa59c', { type: 'module' });
+    if (!wk) wk = new Worker('worker.js?v=e8a36fc0', { type: 'module' });
     const mine = ++job; drop = fail;
     wk.onmessage = (e) => { const m = e.data; if (m.job !== mine) return; if (m.progress !== undefined) { if (onProgress) onProgress(m.progress); return; } drop = null; if (m.ok) done(m); else fail(new Error(m.error)); };
     wk.onerror = (e) => { drop = null; wk = null; fail(new Error(e.message || 'the worker stopped')); };
@@ -321,6 +321,15 @@ function toast(text) { el.toast.textContent = text; el.toast.classList.add('on')
   const box = $('#glassTog');
   const apply = () => { document.documentElement.toggleAttribute('data-glass', state.glass); box.checked = state.glass; requestAnimationFrame(() => el.controls.querySelectorAll('.seg').forEach((sg) => placePill(sg, false))); };
   box.addEventListener('change', () => { state.glass = box.checked; remember(); apply(); });
+  apply();
+}
+
+/* ---------- the Old look switch (top right) ---------- */
+// Poster is the look since 18 Nov 2026 (flat ink blocks); Old look puts the frosted Chalkboard look back. Both work with Glass.
+{
+  const box = $('#oldTog');
+  const apply = () => { if (state.old) document.documentElement.removeAttribute('data-style'); else document.documentElement.setAttribute('data-style', 'poster'); box.checked = state.old; requestAnimationFrame(() => el.controls.querySelectorAll('.seg').forEach((sg) => placePill(sg, false))); };
+  box.addEventListener('change', () => { state.old = box.checked; remember(); apply(); });
   apply();
 }
 
