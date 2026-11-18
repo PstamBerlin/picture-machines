@@ -1,15 +1,14 @@
-Fonts shipped with Chalkboard
-=============================
+Fonts shipped with Picture Machines
+===================================
 
-Unbounded-500.woff2, Unbounded-800.woff2:
-Copyright 2022 The Unbounded Project Authors (https://github.com/googlefonts/unbounded)
+AlfaSlabOne.woff2:
+Copyright 2016 The Alfa Slab One Project Authors (http://www.jmsole.cl | info@jmsole.cl), with Reserved Font Name "Alfa Slab".
 
-Manrope-500.woff2, Manrope-600.woff2, Manrope-700.woff2, Manrope-800.woff2:
-Copyright 2018 The Manrope Project Authors (https://github.com/googlefonts/manrope)
+ZillaSlab-400.woff2, ZillaSlab-600.woff2, ZillaSlab-700.woff2:
+Copyright 2017, The Mozilla Foundation
 
-Both are the Latin subset as served by Google Fonts (each file is the
-variable font, so one file covers every weight). They are bundled so
-Chalkboard never fetches a font from the network.
+They are the Latin subset as served by Google Fonts. They are bundled so
+Picture Machines never fetches a font from the network.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

@@ -1,9 +1,9 @@
 // Picture Machines: the worker. The page sends a picture and a machine's settings; the machine runs here,
 // off the page's own thread, so the page stays smooth however long a picture takes.
-import * as P from './m2d.js?v=e5525337';
-import * as T from './m3d.js?v=e5525337';
-import { flatten } from './lib.js?v=e5525337';
-import { BY_ID } from './machines.js?v=e5525337';
+import * as P from './m2d.js?v=480fa59c';
+import * as T from './m3d.js?v=480fa59c';
+import { flatten } from './lib.js?v=480fa59c';
+import { BY_ID } from './machines.js?v=480fa59c';
 
 const RUN = { paint: P.paint, comic: P.comic, pixel: P.pixel, sketch: P.sketch, glass: P.glass, bricks: P.bricks, poster: P.poster, litho: T.litho, cutter: T.cutter, stamp: T.stamp, tag: T.tag };
 self.onmessage = (e) => {

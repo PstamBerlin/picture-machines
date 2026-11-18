@@ -3,11 +3,10 @@
    faint fill, small wide display headings, one accent colour, and a pill with a two-colour edge that
    marks what is chosen. The colours are its own ("Print press"): deep navy with the three printing
    inks. The motion is Chalkboard's springy kind: things are pulled and stretch, squash and settle. */
-@font-face{font-family:"Manrope";font-weight:500;font-display:swap;src:url("fonts/Manrope-500.woff2") format("woff2")}
-@font-face{font-family:"Manrope";font-weight:700;font-display:swap;src:url("fonts/Manrope-700.woff2") format("woff2")}
-@font-face{font-family:"Manrope";font-weight:800;font-display:swap;src:url("fonts/Manrope-800.woff2") format("woff2")}
-@font-face{font-family:"Unbounded";font-weight:500;font-display:swap;src:url("fonts/Unbounded-500.woff2") format("woff2")}
-@font-face{font-family:"Unbounded";font-weight:800;font-display:swap;src:url("fonts/Unbounded-800.woff2") format("woff2")}
+@font-face{font-family:"Zilla Slab";font-weight:400;font-display:swap;src:url("fonts/ZillaSlab-400.woff2") format("woff2")}
+@font-face{font-family:"Zilla Slab";font-weight:600;font-display:swap;src:url("fonts/ZillaSlab-600.woff2") format("woff2")}
+@font-face{font-family:"Zilla Slab";font-weight:700;font-display:swap;src:url("fonts/ZillaSlab-700.woff2") format("woff2")}
+@font-face{font-family:"Alfa Slab One";font-weight:400;font-display:swap;src:url("fonts/AlfaSlabOne.woff2") format("woff2")}
 
 :root{
   --bg:#0B1026; --panel:#101844; --ink:#FFFFFF; --ink-dim:rgba(255,255,255,.66);
@@ -21,7 +20,7 @@
   --hover:color-mix(in srgb, var(--ink) 8%, var(--fill));
   --lift:rgba(255,255,255,.10); --lift-2:rgba(255,255,255,.14); --shade:rgba(0,0,0,.25);
   --radius:14px; --ctl-r:9px;
-  --font:"Manrope",ui-sans-serif,-apple-system,system-ui,sans-serif; --display:"Unbounded","Manrope",ui-sans-serif,system-ui,sans-serif;
+  --font:"Zilla Slab",Rockwell,Georgia,serif; --display:"Alfa Slab One","Zilla Slab",Rockwell,Georgia,serif;   /* --display has one weight: only for the name and the big headline */
   /* motion: one set of timings, and two real springs (a soft one for things that travel, a lively one for small things) */
   --ease:cubic-bezier(.22,.61,.36,1); --ease-out:cubic-bezier(.22,1,.36,1);
   --speed:150ms; --dur-2:200ms; --dur-3:320ms;
@@ -33,7 +32,7 @@
 
 *{box-sizing:border-box}
 html{color-scheme:dark;-webkit-text-size-adjust:100%}
-body{margin:0;min-height:100dvh;background:var(--bg);color:var(--ink);font:500 14px/1.45 var(--font);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+body{margin:0;min-height:100dvh;background:var(--bg);color:var(--ink);font:400 15.5px/1.4 var(--font);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none;padding:0}
 [hidden]{display:none!important}
@@ -59,9 +58,9 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .brand{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
 .mark{width:30px;height:30px;border-radius:10px;animation:turn calc(var(--t) * 1.3) var(--pop) 80ms backwards;transition:transform var(--t) var(--pop)}
 .brand:hover .mark{transform:rotate(-14deg) scale(1.12)}
-.name{font:800 13px/1 var(--display);letter-spacing:-.02em;white-space:nowrap}
+.name{font:400 16.5px/1 var(--display);letter-spacing:0;white-space:nowrap}
 .inks{display:flex;gap:4px;margin-left:auto}
-.glasstog{flex:none;gap:8px;font:800 10px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim)}
+.glasstog{flex:none;gap:8px;font:700 12px/1 var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim)}
 .inks i{width:10px;height:10px;border-radius:3px;animation:arrive var(--t) var(--pop) backwards}
 .inks i:nth-child(1){background:var(--c);animation-delay:120ms}.inks i:nth-child(2){background:var(--m);animation-delay:160ms}.inks i:nth-child(3){background:var(--y);animation-delay:200ms}.inks i:nth-child(4){background:#05070f;box-shadow:inset 0 0 0 1px var(--line);animation-delay:240ms}
 
@@ -69,9 +68,9 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .app{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start;padding:16px clamp(12px,2.4vw,22px);max-width:1440px;width:100%;margin:0 auto}
 .stage{min-width:0;position:sticky;top:16px}
 .panel{position:relative;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:12px;animation:rise var(--t) var(--spring) 80ms backwards}
-footer{padding:4px 16px 16px;text-align:center;font-size:11.5px;color:var(--ink-dim)}
+footer{padding:4px 16px 16px;text-align:center;font-size:12.5px;color:var(--ink-dim)}
 /* the small wide headings */
-h2,.sub{margin:0 0 7px;font:800 10px/1.2 var(--display);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim);display:flex;align-items:center;gap:9px}
+h2,.sub{margin:0 0 7px;font:700 12.5px/1.2 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim);display:flex;align-items:center;gap:9px}
 h2::after{content:"";flex:1;height:1px;background:var(--line);transform-origin:0 50%;animation:draw calc(var(--t) * 1.2) var(--spring) 200ms backwards}
 
 /* ---- buttons: quiet ones sit on the faint fill, the main one is the accent ---- */
@@ -91,7 +90,7 @@ h2::after{content:"";flex:1;height:1px;background:var(--line);transform-origin:0
 .drop{position:relative;min-height:min(72dvh,640px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:44px 24px;border-radius:18px;
   animation:rise var(--t) var(--spring) backwards;transition:transform var(--t) var(--pop),border-color var(--speed) var(--ease)}
 .drop.over{transform:scale(1.012);border-color:var(--stroke)}
-.drop h1{margin:0;font:800 clamp(22px,3.6vw,38px)/1.14 var(--display);letter-spacing:-.03em;max-width:16em}
+.drop h1{margin:0;font:400 clamp(25px,4vw,44px)/1.16 var(--display);letter-spacing:0;max-width:16em}
 .ink-c{color:var(--c)}.ink-m{color:var(--m)}.ink-y{color:var(--y)}
 .lead{margin:0 0 4px;max-width:36em;color:var(--ink-dim);font-size:14.5px}
 .drop .btn{height:40px;padding:0 18px;font-size:14px}
@@ -119,17 +118,17 @@ h2::after{content:"";flex:1;height:1px;background:var(--line);transform-origin:0
 .view.print #after{clip-path:none}
 .wipe.back{transition:left var(--t) var(--pop)}
 .view.back #after{transition:clip-path var(--t) var(--pop)}
-.busy{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:9px;height:28px;padding:0 10px 0 11px;border-radius:999px;border:1px solid var(--line);background:rgba(8,12,32,.82);font-size:11.5px;font-weight:700;animation:arrive 260ms var(--pop)}
+.busy{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:9px;height:28px;padding:0 10px 0 11px;border-radius:999px;border:1px solid var(--line);background:rgba(8,12,32,.82);font-size:12.5px;font-weight:700;animation:arrive 260ms var(--pop)}
 .busy b{width:70px;height:3px;border-radius:3px;background:var(--track);overflow:hidden}
 .busy i{display:block;height:100%;width:0%;border-radius:3px;background:var(--stroke);transition:width 160ms linear}
 .stats{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:5px}
-.stats li{padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--frost);font-size:11.5px;font-weight:600;color:var(--ink-dim);animation:arrive var(--t) var(--pop) backwards}
+.stats li{padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--frost);font-size:12.5px;font-weight:600;color:var(--ink-dim);animation:arrive var(--t) var(--pop) backwards}
 .stats li:nth-child(2){animation-delay:45ms}.stats li:nth-child(3){animation-delay:90ms}.stats li:nth-child(4){animation-delay:135ms}
 
 /* ---- the machines ---- */
 .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .card{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:5px 3px 7px;border:1.5px solid transparent;border-radius:var(--radius);
-  font-size:10.5px;font-weight:700;line-height:1.15;text-align:center;color:var(--ink-dim);
+  font-size:11.5px;font-weight:700;line-height:1.15;text-align:center;color:var(--ink-dim);
   transition:background var(--speed) var(--ease),color var(--speed) var(--ease),transform var(--t) var(--pop);animation:arrive var(--t) var(--pop) backwards;animation-delay:calc(var(--n,0) * 30ms + 140ms)}
 .card:hover:not(.on){background:color-mix(in srgb, var(--ink) 7%, transparent);color:var(--ink);transform:scale(1.04)}
 .card:active{transform:scale(.92);transition-duration:var(--speed),var(--speed),70ms}
@@ -153,16 +152,16 @@ h2::after{content:"";flex:1;height:1px;background:var(--line);transform-origin:0
 .ico.popped{animation:icopop var(--t) var(--pop)}
 .head:hover .ico{transform:scale(1.12) rotate(-8deg)}
 .head .st{flex:1;min-width:0}
-.head b{display:block;font:800 11.5px/1.2 var(--display);letter-spacing:-.01em}
-.head small{display:block;margin-top:2px;font-size:11px;line-height:1.3;color:var(--ink-dim)}
+.head b{display:block;font:700 15px/1.15 var(--font);letter-spacing:0}
+.head small{display:block;margin-top:2px;font-size:12px;line-height:1.3;color:var(--ink-dim)}
 #controls{display:flex;flex-direction:column;gap:11px}
 #controls > *{transform-origin:50% 0;animation:drip var(--t) var(--spring) backwards;animation-delay:calc(var(--n,0) * 26ms)}
 .ctl{display:flex;flex-direction:column;gap:5px;font-size:12px}
 .ctl .lbl{display:flex;justify-content:space-between;gap:8px;color:var(--ink);font-weight:700}
-.ctl output{font:500 10.5px/1.6 var(--display);color:var(--ink-dim);font-variant-numeric:tabular-nums}
+.ctl output{font:600 13px/1.3 var(--font);color:var(--ink-dim);font-variant-numeric:tabular-nums}
 /* a row of choices on one track; the pill behind the chosen one is pulled across to the next */
 .seg{position:relative;display:flex;flex-wrap:wrap;gap:2px;padding:3px;border:1px solid var(--line);border-radius:calc(var(--ctl-r) + 1px);background:var(--fill);box-shadow:inset 0 1px 0 var(--lift-2)}
-.seg button{position:relative;z-index:1;flex:1 1 auto;height:26px;padding:0 8px;border-radius:calc(var(--ctl-r) - 1px);font-size:11px;font-weight:700;color:var(--ink-dim);transition:color var(--speed) var(--ease),transform var(--t) var(--pop)}
+.seg button{position:relative;z-index:1;flex:1 1 auto;height:26px;padding:0 8px;border-radius:calc(var(--ctl-r) - 1px);font-size:12px;font-weight:700;color:var(--ink-dim);transition:color var(--speed) var(--ease),transform var(--t) var(--pop)}
 .seg button:hover:not(.on){color:var(--ink)}
 .seg button:active{transform:scale(.92);transition-duration:var(--speed),70ms}
 .seg button.on{color:var(--accent-ink)}
@@ -185,7 +184,7 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
 .tog input:checked:active::after{transform:translateX(10px)}
 .actions{display:flex;flex-wrap:wrap;gap:6px}
 .actions .btn{flex:1 1 auto}
-.fine{margin:-4px 2px 0;font-size:11px;font-weight:500;color:var(--ink-dim)}
+.fine{margin:-4px 2px 0;font-size:12px;font-weight:500;color:var(--ink-dim)}
 .toast{position:fixed;left:50%;bottom:20px;z-index:9;max-width:calc(100vw - 32px);padding:9px 15px;border-radius:999px;border:1px solid var(--line);background:rgba(8,12,32,.94);box-shadow:0 10px 40px var(--shade);font-weight:700;font-size:12.5px;
   transform:translate(-50%,180%);visibility:hidden;transition:transform var(--t) var(--pop),visibility 0s linear var(--t)}
 .toast.on{transform:translate(-50%,0);visibility:visible;transition:transform var(--t) var(--pop),visibility 0s}
@@ -246,7 +245,7 @@ html[data-glass] input[type=range]:active::-webkit-slider-thumb{background:#fff}
   .drop{min-height:52dvh;padding:38px 16px}
   .cards{display:flex;overflow-x:auto;scroll-snap-type:x proximity;gap:6px;margin:0 -12px;padding:2px 12px 4px;scrollbar-width:none}
   .cards::-webkit-scrollbar{display:none}
-  .card{flex:0 0 76px;scroll-snap-align:start;font-size:11px}
+  .card{flex:0 0 76px;scroll-snap-align:start;font-size:12px}
   .seg button{height:32px;font-size:12px}
   .btn{height:40px}
   .bar .btn{height:32px}
@@ -256,7 +255,7 @@ html[data-glass] input[type=range]:active::-webkit-slider-thumb{background:#fff}
   .bar{flex-wrap:wrap;height:auto;min-height:54px;padding-top:9px;padding-bottom:9px;row-gap:8px}
   .bar::after{content:"";order:4;flex-basis:100%;height:0}
   .springtog{order:5;margin-left:auto}.glasstog:not(.springtog){order:6}
-  .glasstog{font-size:9px}
+  .glasstog{font-size:10px}
   html[data-glass] .bar{border-radius:24px;padding-top:9px;padding-bottom:9px}}
 @media (max-width: 900px){html[data-glass] .bar{margin-top:8px}}
 
